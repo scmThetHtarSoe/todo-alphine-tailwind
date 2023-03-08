@@ -13,7 +13,7 @@ const todoApp = () => ({
         ? []
         : JSON.parse(localStorage.getItem("todos"));
     this.datas.push({
-      id: this.datas.length + 1,
+      id: Date.now(),
       text: this.message,
       status: false,
     });
@@ -53,7 +53,7 @@ const todoApp = () => ({
       JSON.parse(localStorage.getItem("todos")) == null
         ? []
         : JSON.parse(localStorage.getItem("todos"));
-    if (el.classList.contains("done")) {
+    if (el.innerText == "Check All") {
       this.datas.map((data) => (data.status = true));
       el.classList.remove("done");
       el.innerText = "Uncheck All";
@@ -72,25 +72,47 @@ const todoApp = () => ({
   },
   check(el, idx) {
     if (el.checked) {
-      this.datas[idx - 1].status = true;
+      var value = this.datas.filter(function (data) {
+        return data.id == idx;
+      });
+      value[0].status = true;
     } else {
-      this.datas[idx - 1].status = false;
+      var value = this.datas.filter(function (data) {
+        return data.id == idx;
+      });
+      value[0].status = false;
     }
-    this.leftItem = this.datas.filter((data) => data.status != true).length;
+    if (this.leftItem == "0") {
+      document.getElementById("checkAll").innerHTML = "Uncheck All";
+    } else {
+      document.getElementById("checkAll").innerHTML = "Check All";
+    }
     this.updateLocalStorage();
+    this.leftItem = this.datas.filter((data) => data.status != true).length;
   },
-  editfun(idx) {
-    const getinputs = document.querySelectorAll(".getallinputs");
-    const gettexts = document.querySelectorAll(".text");
-    gettexts[idx - 1].classList.add("editinputs");
-    getinputs[idx - 1].classList.remove("editinputs");
+  editfun(el, idx) {
+    el.classList.add("editinputs");
+    el.nextElementSibling.classList.remove("editinputs");
     this.$root.querySelector("#task_edit-" + idx.toString()).focus();
   },
-  updatefun(idx) {
-    const getinputs = document.querySelectorAll(".getallinputs");
-    const gettexts = document.querySelectorAll(".text");
-    gettexts[idx - 1].classList.remove("editinputs");
-    getinputs[idx - 1].classList.add("editinputs");
+  updatefun(el, idx) {
+    el.parentNode.previousElementSibling.classList.remove("editinputs");
+    el.parentNode.classList.add("editinputs");
+
+    var value = JSON.parse(localStorage.getItem("todos"));
+    var oldVal = value.filter(function (data) {
+      return data.id == idx;
+    });
+
+    var getoldVal = oldVal[0].text;
+    el.addEventListener("blur", function (event) {
+      if (el.value.trim() === "") {
+        console.log(getoldVal);
+        console.log(el);
+        el.parentNode.previousElementSibling.innerText = getoldVal;
+        el.value = getoldVal;
+      }
+    });
     this.updateLocalStorage();
   },
 });
